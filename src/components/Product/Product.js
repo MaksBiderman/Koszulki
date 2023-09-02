@@ -2,18 +2,17 @@ import styles from './Product.module.scss';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import Button from '../Button/Button';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import ProductImage from '../ProductImage/ProductImage';
 import ProductOptions from '../ProductOptions/ProductOptions';
 
 const Product = props => {
   const { colors, sizes } = props;
 
-  const prepareColorClassName = color => {
-    return styles['color' + color[0].toUpperCase() + color.substr(1).toLowerCase()];
-  }
+  const [currentColor, setCurrentColor] = useState(colors[0]);
+  const [currentSize, setCurrentSize] = useState(sizes[0].name);
 
-  const getPrice = () => {
+  const price = useMemo (() =>{
     const selectedSize = sizes.find((size) => size.name === currentSize);
     if (selectedSize) {
       return props.basePrice + selectedSize.additionalPrice;
@@ -21,10 +20,9 @@ const Product = props => {
     else {
       return props.basePrice;
     }
-  }
+  },[currentSize, props.basePrice, sizes])
 
-  const [currentColor, setCurrentColor] = useState(colors[0]);
-  const [currentSize, setCurrentSize] = useState(sizes[0].name);
+
 
   return (
     <article className={styles.product}>
@@ -32,7 +30,7 @@ const Product = props => {
       <div>
         <header>
           <h2 className={styles.name}>{props.title}</h2>
-          <span className={styles.price}>Price: {getPrice()}$</span>
+          <span className={styles.price}>Price: {price}$</span>
         </header>
         <ProductOptions
           sizes={sizes}
@@ -41,7 +39,7 @@ const Product = props => {
           currentColor={currentColor}
           setCurrentSize={setCurrentSize}
           setCurrentColor={setCurrentColor}
-          getPrice={getPrice}
+          price={price}
         />
         <Button className={styles.button} onClick={e => {
           e.preventDefault();
@@ -49,7 +47,7 @@ const Product = props => {
           console.log('-----------------------------');
           console.log('Name: ' + props.name);
           console.log('Size: ' + currentSize);
-          console.log('Price: ' + getPrice());
+          console.log('Price: ' + price);
           console.log('Color: ' + currentColor);
         }}>
           <span className="fa fa-shopping-cart" />
